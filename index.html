@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📚 簿記テスト</title>
+  <title>📚 江東区最強せいちゃんへの挑戦問題</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -277,6 +277,23 @@
 
     .btn-home:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(102,126,234,0.4); }
 
+    .btn-reset {
+      margin-top: 12px;
+      width: 100%;
+      padding: 11px;
+      background: transparent;
+      color: #e53e3e;
+      border: 2px solid #e53e3e;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-reset:hover { background: #fff5f5; transform: translateY(-1px); }
+
     /* 紙吹雪アニメ */
     .confetti-wrap {
       position: fixed;
@@ -310,10 +327,13 @@
   <div id="screen-home">
     <div class="home-header">
       <div class="logo">📚</div>
-      <h1>簿記テスト</h1>
+      <h1>江東区最強せいちゃんへの挑戦問題</h1>
       <p>分記法（商品売買益）レベル ／ 各10問・100点満点</p>
     </div>
     <div class="test-grid" id="test-grid"></div>
+    <button class="btn-reset" onclick="resetScores()" style="margin-top:24px;">
+      🗑️ 最高得点をリセットする
+    </button>
   </div>
 
   <!-- QUIZ -->
@@ -731,6 +751,12 @@ let currentTest = null, currentQ = 0, answers = [], shuffledChoices = [];
 
 function getBest(id)    { return parseInt(localStorage.getItem(`best_${id}`) || '0', 10); }
 function setBest(id, s) { if (s > getBest(id)) localStorage.setItem(`best_${id}`, s); }
+function resetScores() {
+  if (!confirm('🗑️ 全テストの最高得点をリセットしますか？')) return;
+  TESTS.forEach(t => localStorage.removeItem(`best_${t.id}`));
+  soundClick();
+  showHome();
+}
 function fmt(n)         { return '¥' + n.toLocaleString(); }
 
 // ============================================================
