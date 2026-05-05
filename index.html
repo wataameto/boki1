@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>簿記テスト（分記法）</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      max-width: 700px;
+      width: 100%;
+      padding: 32px 28px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.6rem;
+      color: #1a2a3a;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #6b7a8d;
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+    }
+
+    /* ===== HOME ===== */
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .test-card {
+      border: 2px solid #d0dce8;
+      border-radius: 12px;
+      padding: 20px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #f8fbff;
+    }
+
+    .test-card:hover {
+      border-color: #4a90d9;
+      background: #eaf3fb;
+      transform: translateY(-2px);
+    }
+
+    .test-card h2 { font-size: 1.1rem; color: #1a2a3a; margin-bottom: 8px; }
+    .test-card .best-score { font-size: 0.85rem; color: #6b7a8d; }
+    .test-card .best-score span { font-weight: bold; color: #4a90d9; }
+
+    /* ===== QUIZ ===== */
+    .progress-bar-wrap {
+      background: #e2eaf2;
+      border-radius: 99px;
+      height: 8px;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar {
+      background: #4a90d9;
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.4s;
+    }
+
+    .progress-label {
+      font-size: 0.8rem;
+      color: #6b7a8d;
+      text-align: right;
+      margin-bottom: 20px;
+    }
+
+    .scenario {
+      background: #f4f7fa;
+      border-left: 4px solid #4a90d9;
+      border-radius: 8px;
+      padding: 16px 18px;
+      font-size: 1.05rem;
+      color: #1a2a3a;
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .choices { display: flex; flex-direction: column; gap: 12px; }
+
+    .choice-btn {
+      border: 2px solid #d0dce8;
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      text-align: left;
+      background: #fff;
+      transition: all 0.15s;
+      width: 100%;
+    }
+
+    .choice-btn:not([disabled]):hover {
+      border-color: #4a90d9;
+      background: #eaf3fb;
+    }
+
+    .choice-btn.correct {
+      border-color: #27ae60;
+      background: #eafaf1;
+    }
+
+    .choice-btn.wrong {
+      border-color: #e74c3c;
+      background: #fdf0ef;
+    }
+
+    .choice-btn.reveal {
+      border-color: #27ae60;
+      background: #eafaf1;
+    }
+
+    .journal {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 4px 8px;
+      font-size: 0.88rem;
+    }
+
+    .journal-header {
+      font-size: 0.75rem;
+      color: #888;
+      font-weight: bold;
+    }
+
+    .journal-debit { color: #1a5276; }
+    .journal-credit { color: #6e2f0a; padding-left: 16px; }
+    .journal-sep { color: #ccc; display: flex; align-items: center; justify-content: center; }
+
+    .journal-row {
+      display: contents;
+    }
+
+    .entry-line { display: flex; flex-direction: column; gap: 2px; }
+    .entry-item { display: flex; justify-content: space-between; gap: 12px; }
+
+    .feedback {
+      margin-top: 18px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      display: none;
+    }
+
+    .feedback.correct { background: #eafaf1; color: #1e8449; display: block; }
+    .feedback.wrong { background: #fdf0ef; color: #c0392b; display: block; }
+
+    .next-btn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      background: #4a90d9;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: none;
+      transition: background 0.2s;
+    }
+
+    .next-btn:hover { background: #2d78c8; }
+
+    /* ===== RESULTS ===== */
+    .result-score {
+      text-align: center;
+      margin: 24px 0;
+    }
+
+    .score-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: #eaf3fb;
+      border: 6px solid #4a90d9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .score-num { font-size: 2.6rem; font-weight: bold; color: #1a2a3a; line-height: 1; }
+    .score-label { font-size: 0.85rem; color: #6b7a8d; }
+
+    .score-msg { font-size: 1.1rem; color: #1a2a3a; margin-bottom: 4px; }
+    .best-msg { font-size: 0.9rem; color: #27ae60; font-weight: bold; }
+
+    .result-detail {
+      border-top: 1px solid #e2eaf2;
+      margin-top: 20px;
+      padding-top: 16px;
+    }
+
+    .result-detail h3 { font-size: 1rem; color: #6b7a8d; margin-bottom: 12px; }
+
+    .answer-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f4f8;
+      font-size: 0.85rem;
+    }
+
+    .q-num { min-width: 28px; font-weight: bold; color: #6b7a8d; }
+    .mark { font-size: 1.1rem; min-width: 22px; }
+    .answer-detail { color: #1a2a3a; line-height: 1.6; }
+
+    .home-btn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      background: #6b7a8d;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .home-btn:hover { background: #4a5568; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ===== HOME ===== -->
+  <div id="screen-home">
+    <h1>簿記テスト</h1>
+    <p class="subtitle">分記法（商品売買益）レベル ／ 各10問・100点満点</p>
+    <div class="test-grid" id="test-grid"></div>
+  </div>
+
+  <!-- ===== QUIZ ===== -->
+  <div id="screen-quiz" class="hidden">
+    <h1 id="quiz-title"></h1>
+    <p class="subtitle">仕訳を選んでください</p>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+    <div class="progress-label" id="progress-label"></div>
+    <div class="scenario" id="scenario"></div>
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="next-btn"></button>
+  </div>
+
+  <!-- ===== RESULTS ===== -->
+  <div id="screen-results" class="hidden">
+    <h1 id="result-title"></h1>
+    <div class="result-score">
+      <div class="score-circle">
+        <span class="score-num" id="score-num"></span>
+        <span class="score-label">点 / 100点</span>
+      </div>
+      <p class="score-msg" id="score-msg"></p>
+      <p class="best-msg" id="best-msg"></p>
+    </div>
+    <div class="result-detail">
+      <h3>解答一覧</h3>
+      <div id="answer-list"></div>
+    </div>
+    <button class="home-btn" onclick="showHome()">テスト選択に戻る</button>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// DATA — 30 questions (10 per test)
+// ============================================================
+
+function j(debit, credit) {
+  return { debit, credit };
+}
+function e(account, amount) {
+  return { account, amount };
+}
+
+const TESTS = [
+  {
+    id: 1,
+    title: 'テスト１',
+    questions: [
+      {
+        scenario: '商品¥10,000を現金で仕入れた。',
+        choices: [
+          j([e('商品', 10000)],                          [e('現金', 10000)]),
+          j([e('現金', 10000)],                          [e('商品', 10000)]),
+          j([e('商品', 10000)],                          [e('買掛金', 10000)]),
+          j([e('買掛金', 10000)],                        [e('商品', 10000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '原価¥8,000の商品を¥12,000で現金販売した。',
+        choices: [
+          j([e('現金', 12000)],                          [e('商品', 8000), e('商品売買益', 4000)]),
+          j([e('現金', 12000)],                          [e('商品', 12000)]),
+          j([e('現金', 8000), e('商品売買益', 4000)],    [e('商品', 12000)]),
+          j([e('商品', 8000)],                           [e('現金', 12000), e('商品売買益', 4000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '商品¥15,000を掛けで仕入れた。',
+        choices: [
+          j([e('商品', 15000)],                          [e('買掛金', 15000)]),
+          j([e('買掛金', 15000)],                        [e('商品', 15000)]),
+          j([e('商品', 15000)],                          [e('現金', 15000)]),
+          j([e('売掛金', 15000)],                        [e('商品', 15000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '原価¥6,000の商品を¥9,000で掛け販売した。',
+        choices: [
+          j([e('売掛金', 9000)],                         [e('商品', 6000), e('商品売買益', 3000)]),
+          j([e('売掛金', 9000)],                         [e('商品', 9000)]),
+          j([e('現金', 9000)],                           [e('商品', 6000), e('商品売買益', 3000)]),
+          j([e('商品', 6000), e('商品売買益', 3000)],    [e('売掛金', 9000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '買掛金¥15,000を現金で支払った。',
+        choices: [
+          j([e('買掛金', 15000)],                        [e('現金', 15000)]),
+          j([e('現金', 15000)],                          [e('買掛金', 15000)]),
+          j([e('売掛金', 15000)],                        [e('現金', 15000)]),
+          j([e('現金', 15000)],                          [e('売掛金', 15000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '売掛金¥9,000を現金で回収した。',
+        choices: [
+          j([e('現金', 9000)],                           [e('売掛金', 9000)]),
+          j([e('売掛金', 9000)],                         [e('現金', 9000)]),
+          j([e('現金', 9000)],                           [e('買掛金', 9000)]),
+          j([e('買掛金', 9000)],                         [e('現金', 9000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '原価¥10,000の商品を¥14,000で現金販売した。',
+        choices: [
+          j([e('現金', 14000)],                          [e('商品', 10000), e('商品売買益', 4000)]),
+          j([e('現金', 14000)],                          [e('商品', 14000)]),
+          j([e('現金', 10000), e('商品売買益', 4000)],   [e('商品', 14000)]),
+          j([e('商品', 10000)],                          [e('現金', 14000), e('商品売買益', 4000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '商品¥20,000を掛けで仕入れた。',
+        choices: [
+          j([e('商品', 20000)],                          [e('買掛金', 20000)]),
+          j([e('買掛金', 20000)],                        [e('商品', 20000)]),
+          j([e('商品', 20000)],                          [e('現金', 20000)]),
+          j([e('現金', 20000)],                          [e('商品', 20000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '原価¥15,000の商品を¥22,000で掛け販売した。',
+        choices: [
+          j([e('売掛金', 22000)],                        [e('商品', 15000), e('商品売買益', 7000)]),
+          j([e('売掛金', 22000)],                        [e('商品', 22000)]),
+          j([e('現金', 22000)],                          [e('商品', 15000), e('商品売買益', 7000)]),
+          j([e('商品', 15000), e('商品売買益', 7000)],   [e('売掛金', 22000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '買掛金¥20,000を現金で支払った。',
+        choices: [
+          j([e('買掛金', 20000)],                        [e('現金', 20000)]),
+          j([e('現金', 20000)],                          [e('買掛金', 20000)]),
+          j([e('買掛金', 20000)],                        [e('売掛金', 20000)]),
+          j([e('現金', 20000)],                          [e('売掛金', 20000)]),
+        ],
+        correct: 0,
+      },
+    ],
+  },
+
+  {
+    id: 2,
+    title: 'テスト２',
+    questions: [
+      {
+        scenario: '商品¥25,000を現金で仕入れた。',
+        choices: [
+          j([e('商品', 25000)],                          [e('現金', 25000)]),
+          j([e('現金', 25000)],                          [e('商品', 25000)]),
+          j([e('商品', 25000)],                          [e('買掛金', 25000)]),
+          j([e('現金', 25000)],                          [e('買掛金', 25000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '原価¥18,000の商品を¥27,000で現金販売した。',
+        choices: [
+          j([e('現金', 27000)],                          [e('商品', 18000), e('商品売買益', 9000)]),
+          j([e('現金', 27000)],                          [e('商品', 27000)]),
+          j([e('現金', 18000), e('商品売買益', 9000)],   [e('商品', 27000)]),
+          j([e('商品', 18000)],                          [e('現金', 27000), e('商品売買益', 9000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '商品¥30,000を掛けで仕入れた。',
+        choices: [
+          j([e('商品', 30000)],                          [e('買掛金', 30000)]),
+          j([e('買掛金', 30000)],                        [e('商品', 30000)]),
+          j([e('商品', 30000)],                          [e('現金', 30000)]),
+          j([e('売掛金', 30000)],                        [e('商品', 30000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '原価¥20,000の商品を¥28,000で掛け販売した。',
+        choices: [
+          j([e('売掛金', 28000)],                        [e('商品', 20000), e('商品売買益', 8000)]),
+          j([e('売掛金', 28000)],                        [e('商品', 28000)]),
+          j([e('現金', 28000)],                          [e('商品', 20000), e('商品売買益', 8000)]),
+          j([e('商品', 20000), e('商品売買益', 8000)],   [e('売掛金', 28000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '売掛金¥27,000を現金で回収した。',
+        choices: [
+          j([e('現金', 27000)],                          [e('売掛金', 27000)]),
+          j([e('売掛金', 27000)],                        [e('現金', 27000)]),
+          j([e('現金', 27000)],                          [e('買掛金', 27000)]),
+          j([e('買掛金', 27000)],                        [e('現金', 27000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '買掛金¥30,000を現金で支払った。',
+        choices: [
+          j([e('買掛金', 30000)],                        [e('現金', 30000)]),
+          j([e('現金', 30000)],                          [e('買掛金', 30000)]),
+          j([e('売掛金', 30000)],                        [e('現金', 30000)]),
+          j([e('現金', 30000)],                          [e('売掛金', 30000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '商品¥12,000を現金で仕入れた。',
+        choices: [
+          j([e('商品', 12000)],                          [e('現金', 12000)]),
+          j([e('現金', 12000)],                          [e('商品', 12000)]),
+          j([e('商品', 12000)],                          [e('買掛金', 12000)]),
+          j([e('買掛金', 12000)],                        [e('商品', 12000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '原価¥9,000の商品を¥13,500で現金販売した。',
+        choices: [
+          j([e('現金', 13500)],                          [e('商品', 9000), e('商品売買益', 4500)]),
+          j([e('現金', 13500)],                          [e('商品', 13500)]),
+          j([e('現金', 9000), e('商品売買益', 4500)],    [e('商品', 13500)]),
+          j([e('商品', 9000)],                           [e('現金', 13500), e('商品売買益', 4500)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '商品¥40,000を掛けで仕入れた。',
+        choices: [
+          j([e('商品', 40000)],                          [e('買掛金', 40000)]),
+          j([e('買掛金', 40000)],                        [e('商品', 40000)]),
+          j([e('商品', 40000)],                          [e('現金', 40000)]),
+          j([e('現金', 40000)],                          [e('商品', 40000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '原価¥25,000の商品を¥35,000で掛け販売した。',
+        choices: [
+          j([e('売掛金', 35000)],                        [e('商品', 25000), e('商品売買益', 10000)]),
+          j([e('売掛金', 35000)],                        [e('商品', 35000)]),
+          j([e('現金', 35000)],                          [e('商品', 25000), e('商品売買益', 10000)]),
+          j([e('商品', 25000), e('商品売買益', 10000)],  [e('売掛金', 35000)]),
+        ],
+        correct: 0,
+      },
+    ],
+  },
+
+  {
+    id: 3,
+    title: 'テスト３',
+    questions: [
+      {
+        scenario: '商品¥50,000を現金で仕入れた。',
+        choices: [
+          j([e('商品', 50000)],                          [e('現金', 50000)]),
+          j([e('現金', 50000)],                          [e('商品', 50000)]),
+          j([e('商品', 50000)],                          [e('買掛金', 50000)]),
+          j([e('現金', 50000)],                          [e('売掛金', 50000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '原価¥30,000の商品を¥45,000で現金販売した。',
+        choices: [
+          j([e('現金', 45000)],                          [e('商品', 30000), e('商品売買益', 15000)]),
+          j([e('現金', 45000)],                          [e('商品', 45000)]),
+          j([e('現金', 30000), e('商品売買益', 15000)],  [e('商品', 45000)]),
+          j([e('商品', 30000)],                          [e('現金', 45000), e('商品売買益', 15000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '商品¥35,000を掛けで仕入れた。',
+        choices: [
+          j([e('商品', 35000)],                          [e('買掛金', 35000)]),
+          j([e('買掛金', 35000)],                        [e('商品', 35000)]),
+          j([e('商品', 35000)],                          [e('現金', 35000)]),
+          j([e('売掛金', 35000)],                        [e('商品', 35000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '原価¥22,000の商品を¥33,000で掛け販売した。',
+        choices: [
+          j([e('売掛金', 33000)],                        [e('商品', 22000), e('商品売買益', 11000)]),
+          j([e('売掛金', 33000)],                        [e('商品', 33000)]),
+          j([e('現金', 33000)],                          [e('商品', 22000), e('商品売買益', 11000)]),
+          j([e('商品', 22000), e('商品売買益', 11000)],  [e('売掛金', 33000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '買掛金¥35,000を現金で支払った。',
+        choices: [
+          j([e('買掛金', 35000)],                        [e('現金', 35000)]),
+          j([e('現金', 35000)],                          [e('買掛金', 35000)]),
+          j([e('買掛金', 35000)],                        [e('売掛金', 35000)]),
+          j([e('売掛金', 35000)],                        [e('現金', 35000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '売掛金¥33,000を現金で回収した。',
+        choices: [
+          j([e('現金', 33000)],                          [e('売掛金', 33000)]),
+          j([e('売掛金', 33000)],                        [e('現金', 33000)]),
+          j([e('現金', 33000)],                          [e('買掛金', 33000)]),
+          j([e('買掛金', 33000)],                        [e('現金', 33000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '原価¥40,000の商品を¥56,000で現金販売した。',
+        choices: [
+          j([e('現金', 56000)],                          [e('商品', 40000), e('商品売買益', 16000)]),
+          j([e('現金', 56000)],                          [e('商品', 56000)]),
+          j([e('現金', 40000), e('商品売買益', 16000)],  [e('商品', 56000)]),
+          j([e('商品', 40000)],                          [e('現金', 56000), e('商品売買益', 16000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '商品¥60,000を掛けで仕入れた。',
+        choices: [
+          j([e('商品', 60000)],                          [e('買掛金', 60000)]),
+          j([e('買掛金', 60000)],                        [e('商品', 60000)]),
+          j([e('商品', 60000)],                          [e('現金', 60000)]),
+          j([e('現金', 60000)],                          [e('商品', 60000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '原価¥45,000の商品を¥63,000で掛け販売した。',
+        choices: [
+          j([e('売掛金', 63000)],                        [e('商品', 45000), e('商品売買益', 18000)]),
+          j([e('売掛金', 63000)],                        [e('商品', 63000)]),
+          j([e('現金', 63000)],                          [e('商品', 45000), e('商品売買益', 18000)]),
+          j([e('商品', 45000), e('商品売買益', 18000)],  [e('売掛金', 63000)]),
+        ],
+        correct: 0,
+      },
+      {
+        scenario: '買掛金¥60,000を現金で支払った。',
+        choices: [
+          j([e('買掛金', 60000)],                        [e('現金', 60000)]),
+          j([e('現金', 60000)],                          [e('買掛金', 60000)]),
+          j([e('売掛金', 60000)],                        [e('現金', 60000)]),
+          j([e('現金', 60000)],                          [e('売掛金', 60000)]),
+        ],
+        correct: 0,
+      },
+    ],
+  },
+];
+
+// ============================================================
+// STATE
+// ============================================================
+
+let currentTest = null;
+let currentQ = 0;
+let answers = [];  // {correct: bool, chosenIdx: number}
+
+function getBest(testId) {
+  return parseInt(localStorage.getItem(`best_${testId}`) || '0', 10);
+}
+
+function setBest(testId, score) {
+  const prev = getBest(testId);
+  if (score > prev) localStorage.setItem(`best_${testId}`, score);
+}
+
+// ============================================================
+// RENDERING HELPERS
+// ============================================================
+
+function fmt(n) {
+  return '¥' + n.toLocaleString();
+}
+
+function renderJournal(entry) {
+  const dLines = entry.debit.map(e => `<div class="entry-item journal-debit"><span>${e.account}</span><span>${fmt(e.amount)}</span></div>`).join('');
+  const cLines = entry.credit.map(e => `<div class="entry-item journal-credit"><span>${e.account}</span><span>${fmt(e.amount)}</span></div>`).join('');
+  return `
+    <div class="journal">
+      <div>
+        <div class="journal-header">借方（左）</div>
+        <div class="entry-line">${dLines}</div>
+      </div>
+      <div class="journal-sep">／</div>
+      <div>
+        <div class="journal-header">貸方（右）</div>
+        <div class="entry-line">${cLines}</div>
+      </div>
+    </div>
+  `;
+}
+
+function entryText(entry) {
+  const d = entry.debit.map(e => `${e.account} ${fmt(e.amount)}`).join('・');
+  const c = entry.credit.map(e => `${e.account} ${fmt(e.amount)}`).join('・');
+  return `借: ${d} ／ 貸: ${c}`;
+}
+
+// ============================================================
+// SCREENS
+// ============================================================
+
+function showHome() {
+  document.getElementById('screen-home').classList.remove('hidden');
+  document.getElementById('screen-quiz').classList.add('hidden');
+  document.getElementById('screen-results').classList.add('hidden');
+
+  const grid = document.getElementById('test-grid');
+  grid.innerHTML = TESTS.map(t => {
+    const best = getBest(t.id);
+    return `
+      <div class="test-card" onclick="startTest(${t.id})">
+        <h2>${t.title}</h2>
+        <p class="best-score">最高得点: <span>${best > 0 ? best + '点' : '未挑戦'}</span></p>
+      </div>
+    `;
+  }).join('');
+}
+
+function startTest(testId) {
+  currentTest = TESTS.find(t => t.id === testId);
+  currentQ = 0;
+  answers = [];
+
+  document.getElementById('screen-home').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.remove('hidden');
+  document.getElementById('screen-results').classList.add('hidden');
+
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const test = currentTest;
+  const q = test.questions[currentQ];
+  const total = test.questions.length;
+
+  document.getElementById('quiz-title').textContent = test.title;
+  document.getElementById('progress-bar').style.width = `${(currentQ / total) * 100}%`;
+  document.getElementById('progress-label').textContent = `第 ${currentQ + 1} 問 ／ ${total} 問`;
+  document.getElementById('scenario').textContent = q.scenario;
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('next-btn').style.display = 'none';
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = q.choices.map((choice, i) => `
+    <button class="choice-btn" onclick="answer(${i})" id="choice-${i}">
+      ${renderJournal(choice)}
+    </button>
+  `).join('');
+}
+
+function answer(idx) {
+  const q = currentTest.questions[currentQ];
+  const correct = idx === q.correct;
+  answers.push({ correct, chosenIdx: idx });
+
+  // Disable all buttons
+  q.choices.forEach((_, i) => {
+    const btn = document.getElementById(`choice-${i}`);
+    btn.disabled = true;
+  });
+
+  // Mark chosen
+  document.getElementById(`choice-${idx}`).classList.add(correct ? 'correct' : 'wrong');
+
+  // Reveal correct if wrong
+  if (!correct) {
+    document.getElementById(`choice-${q.correct}`).classList.add('reveal');
+  }
+
+  // Feedback
+  const fb = document.getElementById('feedback');
+  fb.className = `feedback ${correct ? 'correct' : 'wrong'}`;
+  fb.textContent = correct ? '○ 正解！' : '✕ 不正解';
+
+  // Next button
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.style.display = 'block';
+  const isLast = currentQ === currentTest.questions.length - 1;
+  nextBtn.textContent = isLast ? '結果を見る →' : '次の問題 →';
+  nextBtn.onclick = isLast ? showResults : nextQuestion;
+}
+
+function nextQuestion() {
+  currentQ++;
+  renderQuestion();
+}
+
+function showResults() {
+  const total = currentTest.questions.length;
+  const correct = answers.filter(a => a.correct).length;
+  const score = Math.round((correct / total) * 100);
+
+  setBest(currentTest.id, score);
+  const best = getBest(currentTest.id);
+  const isNewBest = score >= best;
+
+  document.getElementById('screen-quiz').classList.add('hidden');
+  document.getElementById('screen-results').classList.remove('hidden');
+
+  document.getElementById('result-title').textContent = currentTest.title + ' 結果';
+  document.getElementById('score-num').textContent = score;
+
+  let msg = '';
+  if (score === 100) msg = '満点です！素晴らしい！🎉';
+  else if (score >= 80) msg = 'よくできました！';
+  else if (score >= 60) msg = 'もう少しです、再挑戦してみましょう！';
+  else msg = '復習してから再挑戦してみましょう！';
+  document.getElementById('score-msg').textContent = msg;
+
+  const bestMsg = document.getElementById('best-msg');
+  bestMsg.textContent = `最高得点: ${best}点${isNewBest && score > 0 ? '（更新！）' : ''}`;
+
+  // Answer list
+  const list = document.getElementById('answer-list');
+  list.innerHTML = currentTest.questions.map((q, i) => {
+    const ans = answers[i];
+    const mark = ans.correct ? '○' : '✕';
+    const markColor = ans.correct ? '#27ae60' : '#e74c3c';
+    const correctEntry = entryText(q.choices[q.correct]);
+    const chosenEntry = entryText(q.choices[ans.chosenIdx]);
+    let detail = `<span>${q.scenario}</span><br><span style="color:#555">正解: ${correctEntry}</span>`;
+    if (!ans.correct) {
+      detail += `<br><span style="color:#c0392b">あなたの回答: ${chosenEntry}</span>`;
+    }
+    return `
+      <div class="answer-row">
+        <span class="q-num">Q${i + 1}</span>
+        <span class="mark" style="color:${markColor}">${mark}</span>
+        <div class="answer-detail">${detail}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+showHome();
+</script>
+</body>
+</html>
