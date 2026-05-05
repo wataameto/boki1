@@ -708,6 +708,8 @@ function startTest(testId) {
   renderQuestion();
 }
 
+let shuffledChoices = [];
+
 function renderQuestion() {
   const test = currentTest;
   const q = test.questions[currentQ];
@@ -721,18 +723,27 @@ function renderQuestion() {
   document.getElementById('feedback').textContent = '';
   document.getElementById('next-btn').style.display = 'none';
 
+  // シャッフルして正解のインデックスを追跡
+  const indexed = q.choices.map((c, i) => ({ choice: c, origIdx: i }));
+  for (let i = indexed.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
+  }
+  shuffledChoices = indexed;
+  const correctShuffledIdx = indexed.findIndex(x => x.origIdx === q.correct);
+
   const choicesEl = document.getElementById('choices');
-  choicesEl.innerHTML = q.choices.map((choice, i) => `
-    <button class="choice-btn" onclick="answer(${i})" id="choice-${i}">
-      ${renderJournal(choice)}
+  choicesEl.innerHTML = indexed.map((item, i) => `
+    <button class="choice-btn" onclick="answer(${i}, ${correctShuffledIdx})" id="choice-${i}">
+      ${renderJournal(item.choice)}
     </button>
   `).join('');
 }
 
-function answer(idx) {
+function answer(idx, correctIdx) {
   const q = currentTest.questions[currentQ];
-  const correct = idx === q.correct;
-  answers.push({ correct, chosenIdx: idx });
+  const correct = idx === correctIdx;
+  answers.push({ correct, chosenIdx: shuffledChoices[idx].origIdx });
 
   // Disable all buttons
   q.choices.forEach((_, i) => {
@@ -745,7 +756,7 @@ function answer(idx) {
 
   // Reveal correct if wrong
   if (!correct) {
-    document.getElementById(`choice-${q.correct}`).classList.add('reveal');
+    document.getElementById(`choice-${correctIdx}`).classList.add('reveal');
   }
 
   // Feedback
