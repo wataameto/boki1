@@ -277,24 +277,7 @@
 
     .btn-home:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(102,126,234,0.4); }
 
-    .btn-reset {
-      margin-top: 12px;
-      width: 100%;
-      padding: 11px;
-      background: transparent;
-      color: #e53e3e;
-      border: 2px solid #e53e3e;
-      border-radius: 12px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-
-    .btn-reset:hover { background: #fff5f5; transform: translateY(-1px); }
-
-    /* 紙吹雪アニメ */
+/* 紙吹雪アニメ */
     .confetti-wrap {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -317,6 +300,28 @@
       100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
     }
 
+    .home-top {
+      position: relative;
+    }
+
+    .btn-reset-corner {
+      position: absolute;
+      top: 0; right: 0;
+      background: transparent;
+      color: #e53e3e;
+      border: 2px solid #e53e3e;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .btn-reset-corner:hover { background: #fff5f5; transform: translateY(-1px); }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -325,15 +330,15 @@
 
   <!-- HOME -->
   <div id="screen-home">
-    <div class="home-header">
-      <div class="logo">📚</div>
-      <h1>江東区最強せいちゃんへの挑戦問題</h1>
-      <p>分記法（商品売買益）レベル ／ 各10問・100点満点</p>
+    <div class="home-top">
+      <button class="btn-reset-corner" onclick="resetScores()">🗑️ リセット</button>
+      <div class="home-header">
+        <div class="logo">📚</div>
+        <h1>江東区最強せいちゃんへの挑戦問題</h1>
+        <p>分記法（商品売買益）レベル ／ 各10問・100点満点</p>
+      </div>
     </div>
     <div class="test-grid" id="test-grid"></div>
-    <button class="btn-reset" onclick="resetScores()" style="margin-top:24px;">
-      🗑️ 最高得点をリセットする
-    </button>
   </div>
 
   <!-- QUIZ -->
