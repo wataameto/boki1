@@ -409,12 +409,21 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 let currentUser = null;
+let authReady = false;
 
-auth.onAuthStateChanged(user => {
-  currentUser = user;
+auth.onAuthStateChanged(async user => {
   if (!user) {
-    auth.signInAnonymously().catch(e => console.error('Auth error:', e));
+    try {
+      const result = await auth.signInAnonymously();
+      currentUser = result.user;
+    } catch (e) {
+      console.error('Auth error:', e);
+      return;
+    }
+  } else {
+    currentUser = user;
   }
+  authReady = true;
 });
 
 // ============================================================
@@ -988,8 +997,12 @@ async function showResults() {
 
 (async () => {
   await new Promise(resolve => {
-    if (currentUser) resolve();
-    else auth.onAuthStateChanged(() => resolve());
+    const checkAuth = setInterval(() => {
+      if (authReady) {
+        clearInterval(checkAuth);
+        resolve();
+      }
+    }, 100);
   });
   await showHome();
 })();
