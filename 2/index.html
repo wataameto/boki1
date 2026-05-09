@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>📚 江東区最強せいちゃんへの挑戦問題</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -388,6 +391,32 @@
 
 <script>
 // ============================================================
+// 🔥 Firebase 初期化
+// ============================================================
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA9cUzM6v8x2K3p4L5m6N7o8P9q0R1s2T3",
+  authDomain: "boki1-b66ad.firebaseapp.com",
+  projectId: "boki1-b66ad",
+  storageBucket: "boki1-b66ad.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:abcdefghijklmnop"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+
+auth.onAuthStateChanged(user => {
+  currentUser = user;
+  if (!user) {
+    auth.signInAnonymously().catch(e => console.error('Auth error:', e));
+  }
+});
+
+// ============================================================
 // 🔊 サウンド（Web Audio API）
 // ============================================================
 
@@ -753,15 +782,41 @@ const TESTS = [TEST1, TEST2, TEST3];
 // ============================================================
 
 let currentTest = null, currentQ = 0, answers = [], shuffledChoices = [];
+let bestScores = {};
 
-function getBest(id)    { return parseInt(localStorage.getItem(`best_${id}`) || '0', 10); }
-function setBest(id, s) { if (s > getBest(id)) localStorage.setItem(`best_${id}`, s); }
-function resetScores() {
-  if (!confirm('🗑️ 全テストの最高得点をリセットしますか？')) return;
-  TESTS.forEach(t => localStorage.removeItem(`best_${t.id}`));
-  soundClick();
-  showHome();
+async function getBest(id) {
+  if (!currentUser) return 0;
+  if (bestScores[id] !== undefined) return bestScores[id];
+  try {
+    const doc = await db.collection('scores').doc(currentUser.uid).get();
+    const scores = doc.exists ? doc.data() : {};
+    bestScores = scores;
+    return parseInt(scores[`best_${id}`] || '0', 10);
+  } catch (e) { console.error(e); return 0; }
 }
+
+async function setBest(id, s) {
+  if (!currentUser) return;
+  const best = await getBest(id);
+  if (s > best) {
+    try {
+      await db.collection('scores').doc(currentUser.uid).set({ [`best_${id}`]: s }, { merge: true });
+      bestScores[`best_${id}`] = s;
+    } catch (e) { console.error(e); }
+  }
+}
+
+async function resetScores() {
+  if (!confirm('🗑️ 全テストの最高得点をリセットしますか？')) return;
+  if (!currentUser) return;
+  try {
+    await db.collection('scores').doc(currentUser.uid).delete();
+    bestScores = {};
+    soundClick();
+    showHome();
+  } catch (e) { console.error(e); }
+}
+
 function fmt(n)         { return '¥' + n.toLocaleString(); }
 
 // ============================================================
@@ -791,20 +846,22 @@ function journalText(entry) {
 // 画面制御
 // ============================================================
 
-function showHome() {
+async function showHome() {
   document.getElementById('screen-home').classList.remove('hidden');
   document.getElementById('screen-quiz').classList.add('hidden');
   document.getElementById('screen-results').classList.add('hidden');
-  document.getElementById('test-grid').innerHTML = TESTS.map(t => {
-    const best = getBest(t.id);
+  let html = '';
+  for (const t of TESTS) {
+    const best = await getBest(t.id);
     const bestTxt = best > 0 ? `🏆 最高 <span>${best}点</span>` : '🔰 未挑戦';
-    return `<div class="test-card" onclick="startTest(${t.id}); soundClick();">
+    html += `<div class="test-card" onclick="startTest(${t.id}); soundClick();">
       <span class="card-emoji">${t.emoji}</span>
       <h2>${t.title}</h2>
       <span class="test-type">${t.type}</span>
       <p class="best-score">${bestTxt}</p>
     </div>`;
-  }).join('');
+  }
+  document.getElementById('test-grid').innerHTML = html;
 }
 
 function startTest(id) {
@@ -875,18 +932,18 @@ function answer(idx, correctIdx) {
   nb.style.display = 'block';
   const isLast = currentQ === currentTest.questions.length - 1;
   nb.textContent = isLast ? '📊 結果を見る →' : '➡️ 次の問題';
-  nb.onclick = () => { soundClick(); isLast ? showResults() : nextQuestion(); };
+  nb.onclick = async () => { soundClick(); if (isLast) await showResults(); else nextQuestion(); };
 }
 
 function nextQuestion() { currentQ++; renderQuestion(); }
 
-function showResults() {
+async function showResults() {
   const total   = currentTest.questions.length;
   const correct = answers.filter(a => a.correct).length;
   const score   = Math.round((correct / total) * 100);
   const isJ     = currentTest.id === 3;
-  setBest(currentTest.id, score);
-  const best    = getBest(currentTest.id);
+  await setBest(currentTest.id, score);
+  const best    = await getBest(currentTest.id);
   const isNew   = score > 0 && score >= best;
 
   document.getElementById('screen-quiz').classList.add('hidden');
@@ -928,7 +985,13 @@ function showResults() {
   }).join('');
 }
 
-showHome();
+(async () => {
+  await new Promise(resolve => {
+    if (currentUser) resolve();
+    else auth.onAuthStateChanged(() => resolve());
+  });
+  await showHome();
+})();
 </script>
 </body>
 </html>
