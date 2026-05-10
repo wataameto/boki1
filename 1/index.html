@@ -1007,6 +1007,11 @@ function answer(idx, correctIdx) {
 function nextQuestion() { currentQ++; renderQuestion(); }
 
 async function showResults() {
+  console.log('=== showResults called ===');
+  console.log('currentTest:', currentTest);
+  console.log('currentTest.questions:', currentTest.questions);
+  console.log('First question explanation:', currentTest.questions[0]?.explanation);
+
   const total   = currentTest.questions.length;
   const correct = answers.filter(a => a.correct).length;
   const score   = Math.round((correct / total) * 100);
