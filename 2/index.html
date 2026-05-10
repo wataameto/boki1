@@ -980,6 +980,7 @@ function renderQuestion() {
 }
 
 function answer(idx, correctIdx) {
+  console.log('answer() called:', {idx, correctIdx, currentQ});
   const q  = currentTest.questions[currentQ];
   const isJ = currentTest.id.toString().endsWith('-3');
   const ok  = idx === correctIdx;
@@ -1001,7 +1002,17 @@ function answer(idx, correctIdx) {
   nb.style.display = 'block';
   const isLast = currentQ === currentTest.questions.length - 1;
   nb.textContent = isLast ? '📊 結果を見る →' : '➡️ 次の問題';
-  nb.onclick = async () => { soundClick(); if (isLast) await showResults(); else nextQuestion(); };
+  console.log('Setting next-btn onclick, isLast:', isLast);
+  nb.onclick = async () => {
+    console.log('next-btn clicked, isLast:', isLast);
+    soundClick();
+    if (isLast) {
+      console.log('Calling showResults...');
+      await showResults();
+    } else {
+      nextQuestion();
+    }
+  };
 }
 
 function nextQuestion() { currentQ++; renderQuestion(); }
@@ -1067,7 +1078,7 @@ auth.onAuthStateChanged(user => {
   if (!user) showLoginScreen();
 });
 
-const BUILD_TIME = '2026-05-10 10:59:33';
+const BUILD_TIME = '2026-05-10 11:01:25';
 
 (function() {
   const timeEl = document.createElement('div');
