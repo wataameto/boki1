@@ -1018,6 +1018,22 @@ async function showResults() {
   }).join('');
 }
 
+// ビルド時刻表示
+(function() {
+  const now = new Date();
+  const timeStr = now.toLocaleString('ja-JP');
+  const timeEl = document.createElement('div');
+  timeEl.style.position = 'fixed';
+  timeEl.style.bottom = '10px';
+  timeEl.style.left = '10px';
+  timeEl.style.fontSize = '11px';
+  timeEl.style.color = '#999';
+  timeEl.style.zIndex = '9999';
+  timeEl.style.pointerEvents = 'none';
+  timeEl.textContent = `読込: ${timeStr}`;
+  document.body.appendChild(timeEl);
+})();
+
 (async () => {
   await new Promise(resolve => {
     if (currentUser) resolve();
