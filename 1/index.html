@@ -331,6 +331,18 @@
 <body>
 <div class="container">
 
+  <!-- LOGIN -->
+  <div id="screen-login">
+    <div class="home-header">
+      <div class="logo">📚</div>
+      <h1>江東区最強せいちゃんへの挑戦問題</h1>
+      <p>ログインして問題に挑戦しよう！</p>
+    </div>
+    <button onclick="loginWithGoogle()" style="width:100%; padding:15px; background:linear-gradient(135deg, #667eea, #764ba2); color:#fff; border:none; border-radius:12px; font-size:1rem; font-weight:700; cursor:pointer; font-family:inherit; margin-top:20px;">
+      🔐 Google でログイン
+    </button>
+  </div>
+
   <!-- HOME -->
   <div id="screen-home">
     <div class="home-top">
@@ -411,19 +423,32 @@ const db = firebase.firestore();
 let currentUser = null;
 let authReady = false;
 
-auth.onAuthStateChanged(async user => {
-  if (!user) {
-    try {
-      const result = await auth.signInAnonymously();
-      currentUser = result.user;
-    } catch (e) {
-      console.error('Auth error:', e);
-      return;
-    }
-  } else {
-    currentUser = user;
+async function loginWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  try {
+    await auth.signInWithPopup(provider);
+  } catch (e) {
+    console.error('Google login error:', e);
+    alert('ログインに失敗しました: ' + e.message);
   }
-  authReady = true;
+}
+
+function showLoginScreen() {
+  document.getElementById('screen-login').classList.remove('hidden');
+  document.getElementById('screen-home').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.add('hidden');
+  document.getElementById('screen-results').classList.add('hidden');
+}
+
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    currentUser = user;
+    authReady = true;
+    document.getElementById('screen-login').classList.add('hidden');
+    await showHome();
+  } else {
+    showLoginScreen();
+  }
 });
 
 // ============================================================
@@ -995,17 +1020,9 @@ async function showResults() {
   }).join('');
 }
 
-(async () => {
-  await new Promise(resolve => {
-    const checkAuth = setInterval(() => {
-      if (authReady) {
-        clearInterval(checkAuth);
-        resolve();
-      }
-    }, 100);
-  });
-  await showHome();
-})();
+auth.onAuthStateChanged(user => {
+  if (!user) showLoginScreen();
+});
 </script>
 </body>
 </html>
