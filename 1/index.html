@@ -378,6 +378,10 @@
     <div class="scenario" id="scenario"></div>
     <div class="choices" id="choices"></div>
     <div class="feedback" id="feedback"></div>
+    <div id="explanation" style="margin-top:16px; padding:14px 18px; border-radius:12px; background:linear-gradient(135deg, #f0f4ff, #f5f7ff); border-left:4px solid #667eea; display:none;">
+      <div style="font-size:0.9rem; color:#667eea; font-weight:700; margin-bottom:8px;">📝 解説</div>
+      <div id="explanation-text" style="font-size:0.9rem; color:#2d3748; line-height:1.6;"></div>
+    </div>
     <button class="next-btn" id="next-btn"></button>
   </div>
 
@@ -996,6 +1000,15 @@ function answer(idx, correctIdx) {
     ? CORRECT_MSGS[Math.floor(Math.random()*CORRECT_MSGS.length)]
     : WRONG_MSGS[Math.floor(Math.random()*WRONG_MSGS.length)];
 
+  const expEl = document.getElementById('explanation');
+  const expText = document.getElementById('explanation-text');
+  if (q.explanation) {
+    expText.textContent = q.explanation;
+    expEl.style.display = 'block';
+  } else {
+    expEl.style.display = 'none';
+  }
+
   ok ? soundCorrect() : soundWrong();
 
   const nb = document.getElementById('next-btn');
@@ -1078,7 +1091,7 @@ auth.onAuthStateChanged(user => {
   if (!user) showLoginScreen();
 });
 
-const BUILD_TIME = '2026-05-10 11:01:25';
+const BUILD_TIME = '2026-05-10 11:04:28';
 
 (function() {
   const timeEl = document.createElement('div');
