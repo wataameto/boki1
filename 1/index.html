@@ -984,7 +984,6 @@ function renderQuestion() {
 }
 
 function answer(idx, correctIdx) {
-  console.log('answer() called:', {idx, correctIdx, currentQ});
   const q  = currentTest.questions[currentQ];
   const isJ = currentTest.id.toString().endsWith('-3');
   const ok  = idx === correctIdx;
@@ -1015,12 +1014,9 @@ function answer(idx, correctIdx) {
   nb.style.display = 'block';
   const isLast = currentQ === currentTest.questions.length - 1;
   nb.textContent = isLast ? '📊 結果を見る →' : '➡️ 次の問題';
-  console.log('Setting next-btn onclick, isLast:', isLast);
   nb.onclick = async () => {
-    console.log('next-btn clicked, isLast:', isLast);
     soundClick();
     if (isLast) {
-      console.log('Calling showResults...');
       await showResults();
     } else {
       nextQuestion();
@@ -1031,11 +1027,6 @@ function answer(idx, correctIdx) {
 function nextQuestion() { currentQ++; renderQuestion(); }
 
 async function showResults() {
-  console.log('=== showResults called ===');
-  console.log('currentTest:', currentTest);
-  console.log('currentTest.questions:', currentTest.questions);
-  console.log('First question explanation:', currentTest.questions[0]?.explanation);
-
   const total   = currentTest.questions.length;
   const correct = answers.filter(a => a.correct).length;
   const score   = Math.round((correct / total) * 100);
