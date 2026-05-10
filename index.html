@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📚 江東区最強せいちゃんへの挑戦問題</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      max-width: 720px;
+      width: 100%;
+      padding: 36px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #667eea, #f093fb, #f5576c, #fda085);
+    }
+
+    .header { text-align: center; margin-bottom: 32px; }
+    .logo { font-size: 3rem; margin-bottom: 8px; }
+    .header h1 { font-size: 1.8rem; color: #2d3748; font-weight: 800; margin-bottom: 6px; }
+    .header p  { color: #718096; font-size: 0.95rem; }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .menu-card {
+      border-radius: 16px;
+      padding: 24px 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
+      position: relative;
+      overflow: hidden;
+      border: none;
+      color: #fff;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+    }
+
+    .menu-card:nth-child(1) { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .menu-card:nth-child(2) { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+
+    .menu-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 16px 40px rgba(0,0,0,0.2); }
+
+    .menu-card .card-emoji { font-size: 2.4rem; margin-bottom: 12px; display: block; }
+    .menu-card h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; }
+    .menu-card p { font-size: 0.9rem; opacity: 0.9; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">📚</div>
+    <h1>江東区最強せいちゃんへの挑戦問題</h1>
+    <p>パートを選んでください</p>
+  </div>
+
+  <div class="menu-grid">
+    <a href="1/" class="menu-card">
+      <span class="card-emoji">💡</span>
+      <h2>パート 1</h2>
+      <p>用語・区分・仕訳</p>
+    </a>
+    <a href="2/" class="menu-card">
+      <span class="card-emoji">📊</span>
+      <h2>パート 2</h2>
+      <p>応用問題</p>
+    </a>
+  </div>
+</div>
+</body>
+</html>
