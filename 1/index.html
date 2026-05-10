@@ -970,6 +970,7 @@ function renderQuestion() {
   document.getElementById('progress-pct').textContent   = pct + '%';
   document.getElementById('scenario').textContent       = q.scenario;
   document.getElementById('feedback').className         = 'feedback';
+  document.getElementById('explanation').style.display  = 'none';
   document.getElementById('next-btn').style.display     = 'none';
 
   const indexed = shuffle(q.choices.map((c,i)=>({choice:c,origIdx:i})));
