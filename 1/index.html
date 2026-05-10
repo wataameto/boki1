@@ -981,7 +981,7 @@ function renderQuestion() {
 
 function answer(idx, correctIdx) {
   const q  = currentTest.questions[currentQ];
-  const isJ = currentTest.id === 3;
+  const isJ = currentTest.id.toString().endsWith('-3');
   const ok  = idx === correctIdx;
   answers.push({ correct: ok, chosenOrigIdx: shuffledChoices[idx].origIdx });
 
