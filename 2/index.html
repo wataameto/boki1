@@ -1018,10 +1018,10 @@ async function showResults() {
   }).join('');
 }
 
+const BUILD_TIME = '2026-05-10 01:37:10';
+
 // ビルド時刻表示
 (function() {
-  const now = new Date();
-  const timeStr = now.toLocaleString('ja-JP');
   const timeEl = document.createElement('div');
   timeEl.style.position = 'fixed';
   timeEl.style.bottom = '10px';
@@ -1030,7 +1030,7 @@ async function showResults() {
   timeEl.style.color = '#999';
   timeEl.style.zIndex = '9999';
   timeEl.style.pointerEvents = 'none';
-  timeEl.textContent = `読込: ${timeStr}`;
+  timeEl.textContent = `ビルド: ${BUILD_TIME}`;
   document.body.appendChild(timeEl);
 })();
 
