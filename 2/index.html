@@ -943,7 +943,8 @@ function renderQuestion() {
 
   document.getElementById('choices').innerHTML = indexed.map((item, i) => {
     const label = isJ ? renderJournal(item.choice) : item.choice;
-    return `<button class="choice-btn" onclick="answer(${i},${correctShuffledIdx})" id="choice-${i}">${label}</button>`;
+    const letters = ['a.', 'b.', 'c.', 'd.'];
+    return `<button class="choice-btn" onclick="answer(${i},${correctShuffledIdx})" id="choice-${i}"><span style="font-weight:700; margin-right:8px;">${letters[i]}</span>${label}</button>`;
   }).join('');
 }
 
