@@ -1007,7 +1007,9 @@ async function showResults() {
     const chosenText  = isJ ? journalText(chosenC)  : chosenC;
     let detail = `<span>${q.scenario}</span><br><span style="color:#555;font-size:0.82rem">正解: ${correctText}</span>`;
     if (!ans.correct) detail += `<br><span style="color:#e53e3e;font-size:0.82rem">あなた: ${chosenText}</span>`;
+    detail += `<br><span style="color:#999;font-size:0.75rem">【EXP_START: ${q.explanation ? 'あり' : 'なし'}】</span>`;
     if (q.explanation) detail += `<br><span style="font-size:0.85rem; color:#667eea; margin-top:6px; font-style:italic;">📝 解説: ${q.explanation}</span>`;
+    detail += `<br><span style="color:#999;font-size:0.75rem">【EXP_END】</span>`;
     return `<div class="answer-row">
       <span class="q-num">Q${i+1}</span>
       <span class="mark">${ans.correct ? '✅' : '❌'}</span>
