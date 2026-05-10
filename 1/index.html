@@ -889,7 +889,7 @@ async function showHome() {
   for (const t of TESTS) {
     const best = await getBest(t.id);
     const bestTxt = best > 0 ? `🏆 最高 <span>${best}点</span>` : '🔰 未挑戦';
-    html += `<div class="test-card" onclick="startTest(${t.id}); soundClick();">
+    html += `<div class="test-card" onclick="startTest('${t.id}'); soundClick();">
       <span class="card-emoji">${t.emoji}</span>
       <h2>${t.title}</h2>
       <span class="test-type">${t.type}</span>
